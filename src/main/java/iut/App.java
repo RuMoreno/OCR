@@ -1,8 +1,6 @@
 package iut;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageConverter;
@@ -10,14 +8,15 @@ import ij.process.ImageProcessor;
 
 public class App {
     public static void main(String[] args) {
-
-        // Chargment d’ une image dans un objet
-        String path = "images/1_7.png";
-        
+        ///////////////////////////////////////////
+        // String path = "images/1_7.png";
         // System.out.println("Le chiffre est : " + findNumber(path));
-        
+        ///////////////////////////////////////////
+
+        ///////////////////////////////////////////
         int[][] matrix = createMatrix();
         showMatrix(matrix);
+        ///////////////////////////////////////////
     }
 
     private static int findNumber(String filePath) {
@@ -54,17 +53,11 @@ public class App {
         }
 
         return Integer.parseInt(found.split("_")[0]);
-
-        // Comparer la distance avec toutes les images
-
-        // Récupérer la valeur estimée par l'algo de zoning
-        // Comparer avec la valeur réelle de l'image
-        // Mettre à jour la matrice
     }
 
     public static int percentage(int[][] matrix) {
         int pourcentage = 0;
-        for(int i = 0; i< matrix.length; i ++){
+        for (int i = 0; i < matrix.length; i++) {
             pourcentage += matrix[i][i];
         }
         return pourcentage;
@@ -75,7 +68,7 @@ public class App {
         for (File file : listFiles("images")) {
             ImagePlus other = IJ.openImage(file.getAbsolutePath());
             new ImageConverter(other).convertToGray8();
-            
+
             ImageProcessor otherProcessor = other.getProcessor();
             convertToBlackAndWhite(otherProcessor);
             matrix[Integer.parseInt(file.getName().split("_")[0])][findNumber(file.getPath())]++;
@@ -84,25 +77,23 @@ public class App {
     }
 
     private static void showMatrix(int[][] matrix) {
-        String message =
-                "       0       1       2       3       4       5       6       7       8       9\n"
-                        + "--------------------------------------------------------------------------------\n";
+        String message = "\n     0    1    2    3    4    5    6    7    8    9\n"
+                + "----------------------------------------------------\n";
         for (int i = 0; i < matrix.length; i++) {
-            message += i + " |   ";
+            message += i + " | ";
             for (int j = 0; j < matrix.length; j++) {
                 if (j == 0)
                     message += matrix[i][j] > 9 ? matrix[i][j] : " " + matrix[i][j];
                 else
-                    message +=
-                            matrix[i][j] > 9 ? "      " + matrix[i][j] : "       " + matrix[i][j];
+                    message += matrix[i][j] > 9 ? "   " + matrix[i][j] : "    " + matrix[i][j];
             }
             message += "\n";
         }
 
-        message +=
-                "--------------------------------------------------------------------------------\n";
-        message += "Taux de reconnaissance : " + percentage(matrix) + "%";
-         IJ.showMessage(message);
+        message += "----------------------------------------------------\n";
+        message += "Taux de reconnaissance : " + percentage(matrix) + "%\n";
+        message += "----------------------------------------------------\n";
+        IJ.showMessage(message);
     }
 
 
