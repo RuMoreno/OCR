@@ -61,6 +61,15 @@ public abstract class OCRAlgo {
             pixels[i] = (pixels[i] & 0xff) < 120 ? (byte) 0 : (byte) 255;
     }
 
+    protected double vectorDistance(int[] v1, int[] v2) {
+        int sum = 0;
+        for (int i = 0; i < v1.length; i++) {
+            // carré de la valeur absolue de la différence des deux vecteurs
+            sum += Math.pow(Math.abs((v1[i] - v2[i])), 2);
+        }
+        return Math.sqrt(sum);
+    }
+
     protected int matrixRecognitionRate() {
         int rate = 0;
         for (int i = 0; i < matrix.length; i++) {

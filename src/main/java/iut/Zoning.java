@@ -3,11 +3,11 @@ package iut;
 import java.io.File;
 import ij.process.ImageProcessor;
 
-public class Zonning extends OCRAlgo {
+public class Zoning extends OCRAlgo {
     
     private final static int CELL_COUNT = 5;
     
-    public Zonning(int imageSize) {
+    public Zoning() {
         super(36);
     }
 
@@ -15,7 +15,7 @@ public class Zonning extends OCRAlgo {
     protected int evaluateImage(File file) {
         var image = preprocessImage(file);
 
-        int[] vector = createImageVector(image, CELL_COUNT);
+        int[] vector = createZonesVector(image, CELL_COUNT);
 
         double min = Double.MAX_VALUE;
         String found = null;
@@ -26,7 +26,7 @@ public class Zonning extends OCRAlgo {
 
             var other = preprocessImage(otherFile);
 
-            int[] otherVector = createImageVector(other, CELL_COUNT);
+            int[] otherVector = createZonesVector(other, CELL_COUNT);
             var dist = vectorDistance(vector, otherVector);
 
             if (dist < min) {
@@ -57,7 +57,7 @@ public class Zonning extends OCRAlgo {
         return this;
     }
 
-    private int[] createImageVector(ImageProcessor image, int cellCount) {
+    private int[] createZonesVector(ImageProcessor image, int cellCount) {
         int[] vector = new int[cellCount * cellCount];
         int cellHeight = image.getHeight() / cellCount;
         int cellWidth = image.getWidth() / cellCount;
@@ -75,14 +75,5 @@ public class Zonning extends OCRAlgo {
             }
         }
         return vector;
-    }
-
-    private double vectorDistance(int[] v1, int[] v2) {
-        int sum = 0;
-        for (int i = 0; i < v1.length; i++) {
-            // carré de la valeur absolue de la différence des deux vecteurs
-            sum += Math.pow(Math.abs((v1[i] - v2[i])), 2);
-        }
-        return Math.sqrt(sum);
     }
 }
