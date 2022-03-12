@@ -4,7 +4,12 @@ import java.io.File;
 import ij.process.ImageProcessor;
 
 public class Zonning extends OCRAlgo {
+    
     private final static int CELL_COUNT = 5;
+    
+    public Zonning(int imageSize) {
+        super(36);
+    }
 
     @Override
     protected int evaluateImage(File file) {

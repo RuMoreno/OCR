@@ -9,9 +9,14 @@ import ij.process.ImageProcessor;
 
 public abstract class OCRAlgo {
 
-    protected int imageSize = 36;
-
+    protected Integer imageSize;
+    
     protected int[][] matrix;
+    
+    public OCRAlgo(int imageSize) {
+        this.imageSize = imageSize;
+        this.matrix = new int[10][10];
+    }
 
     protected abstract int evaluateImage(File file);
 
@@ -26,7 +31,6 @@ public abstract class OCRAlgo {
      * @return
      */
     public OCRAlgo evaluate() {
-        this.matrix = new int[10][10];
         File[] files = listFiles("images");
         for (File file : files) {
             var result = evaluateImage(file);
