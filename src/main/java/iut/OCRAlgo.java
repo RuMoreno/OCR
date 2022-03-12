@@ -9,16 +9,30 @@ import ij.process.ImageProcessor;
 
 public abstract class OCRAlgo {
 
+    protected int imageSize = 36;
+
     protected int[][] matrix;
 
     protected abstract int evaluateImage(File file);
 
+    /**
+     * Permet de trouver les meilleurs réglages de préprocessing pour l'image
+     * @return cet instance de l'algo
+     */
+    public abstract OCRAlgo findBestProcessing();
+
+    /**
+     * Permet d'évaluer l'algo à partir du jeu de test d'images
+     * @return
+     */
     public OCRAlgo evaluate() {
         this.matrix = new int[10][10];
         File[] files = listFiles("images");
-        for(File file : files) {
+        for (File file : files) {
             var result = evaluateImage(file);
             var key = Integer.parseInt(file.getName().split("_")[0]);
+
+            System.out.println(file.getName() + " -> Result : " + result + " | Expected : " + key);
             matrix[key][result]++;
         }
         return this;
@@ -26,21 +40,24 @@ public abstract class OCRAlgo {
 
     protected ImageProcessor preprocessImage(File file) {
         ImagePlus baseImg = IJ.openImage(file.getPath());
+
+        // Conversion en niveaux de gris
         new ImageConverter(baseImg).convertToGray8();
+
+        // Conversion en noir et blanc
         ImageProcessor img = baseImg.getProcessor();
         convertToBlackAndWhite(img);
 
-        // TODO resize + erosion + dilation
-        return img;
+        return img.resize(imageSize, imageSize);
     }
 
-    private void convertToBlackAndWhite(ImageProcessor ip) {
+    protected void convertToBlackAndWhite(ImageProcessor ip) {
         byte[] pixels = (byte[]) ip.getPixels();
         for (int i = 0; i < pixels.length; i++)
             pixels[i] = (pixels[i] & 0xff) < 120 ? (byte) 0 : (byte) 255;
     }
 
-    private int matrixRecognitionRate() {
+    protected int matrixRecognitionRate() {
         int rate = 0;
         for (int i = 0; i < matrix.length; i++) {
             rate += matrix[i][i];
@@ -48,6 +65,9 @@ public abstract class OCRAlgo {
         return rate;
     }
 
+    /**
+     * Affiche la dernière évaluation de l'algo
+     */
     protected void showMatrix() {
         String message = "\n     0    1    2    3    4    5    6    7    8    9\n"
                 + "----------------------------------------------------\n";
