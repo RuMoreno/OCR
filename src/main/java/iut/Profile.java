@@ -1,6 +1,5 @@
 package iut;
 
-import java.io.File;
 import ij.process.ImageProcessor;
 
 public class Profile extends OCRAlgo {
@@ -10,33 +9,7 @@ public class Profile extends OCRAlgo {
     }
 
     @Override
-    protected int evaluateImage(File file) {
-        ImageProcessor image = preprocessImage(file);
-
-        var vector = histogram(image);
-
-        double min = Double.MAX_VALUE;
-        String found = null;
-
-        for (File otherFile : listFiles("images")) {
-            if (file.getPath().equals(otherFile.getPath())) // On skip soit même
-                continue;
-
-            var other = preprocessImage(otherFile);
-
-            int[] otherVector = histogram(other);
-            var dist = vectorDistance(vector, otherVector);
-
-            if (dist < min) {
-                min = dist;
-                found = otherFile.getName();
-            }
-        }
-
-        return Integer.parseInt(found.split("_")[0]);
-    }
-
-    private int[] histogram(ImageProcessor image) {
+    protected int[] getVector(ImageProcessor image) {
         int[] result = new int[image.getWidth() + image.getHeight()];
 
         for (int i = 0; i < image.getWidth(); i++) {

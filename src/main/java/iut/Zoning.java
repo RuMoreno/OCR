@@ -1,6 +1,5 @@
 package iut;
 
-import java.io.File;
 import ij.process.ImageProcessor;
 
 public class Zoning extends OCRAlgo {
@@ -12,39 +11,13 @@ public class Zoning extends OCRAlgo {
     }
 
     @Override
-    protected int evaluateImage(File file) {
-        var image = preprocessImage(file);
-
-        int[] vector = createZonesVector(image, CELL_COUNT);
-
-        double min = Double.MAX_VALUE;
-        String found = null;
-
-        for (File otherFile : listFiles("images")) {
-            if (file.getPath().equals(otherFile.getPath())) // On skip soit même
-                continue;
-
-            var other = preprocessImage(otherFile);
-
-            int[] otherVector = createZonesVector(other, CELL_COUNT);
-            var dist = vectorDistance(vector, otherVector);
-
-            if (dist < min) {
-                min = dist;
-                found = otherFile.getName();
-            }
-        }
-
-        return Integer.parseInt(found.split("_")[0]);
-    }
-
-    private int[] createZonesVector(ImageProcessor image, int cellCount) {
-        int[] vector = new int[cellCount * cellCount];
-        int cellHeight = image.getHeight() / cellCount;
-        int cellWidth = image.getWidth() / cellCount;
+    protected int[] getVector(ImageProcessor image) {
+        int[] vector = new int[CELL_COUNT * CELL_COUNT];
+        int cellHeight = image.getHeight() / CELL_COUNT;
+        int cellWidth = image.getWidth() / CELL_COUNT;
         int compteur = 0;
-        for (int a = 0; a < cellCount; a++) {
-            for (int b = 0; b < cellCount; b++) {
+        for (int a = 0; a < CELL_COUNT; a++) {
+            for (int b = 0; b < CELL_COUNT; b++) {
                 for (int i = a * cellHeight; i < a * cellHeight + cellHeight; i++) {
                     for (int j = b * cellWidth; j < b * cellWidth + cellWidth; j++) {
                         if (image.getPixelValue(j, i) == 0.0f) {

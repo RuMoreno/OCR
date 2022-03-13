@@ -10,17 +10,29 @@ import ij.process.ImageProcessor;
 public abstract class OCRAlgo {
 
     protected Integer imageSize;
-    
+
     protected int[][] matrix;
-    
+
+    /**
+     * @param imageSize taille des images en sortie de la chaîne de traitement
+     */
     public OCRAlgo(int imageSize) {
         this.imageSize = imageSize;
+        this.matrix = new int[10][10];
     }
 
-    protected abstract int evaluateImage(File file);
+    /**
+     * Permet de récupérer le vecteur de cette image, le vecteur est définit par l'algorithme
+     * utilisé
+     * 
+     * @param ip
+     * @return
+     */
+    protected abstract int[] getVector(ImageProcessor ip);
 
     /**
      * Permet de trouver les meilleurs réglages de préprocessing pour l'image
+     * 
      * @return cet instance de l'algo
      */
     public OCRAlgo findBestProcessing() {
@@ -43,6 +55,7 @@ public abstract class OCRAlgo {
 
     /**
      * Permet d'évaluer l'algo à partir du jeu de test d'images
+     * 
      * @return
      */
     public OCRAlgo evaluate() {
@@ -58,10 +71,54 @@ public abstract class OCRAlgo {
         return this;
     }
 
+    /**
+     * Permet d'évaluer une image en particulier en la comparant à toutes les autres
+     * 
+     * @param file
+     * @return entier trouvé pour cette image par l'algorithme OCR
+     */
+    protected int evaluateImage(File file) {
+        ImageProcessor image = preprocessImage(file);
+
+        var vector = getVector(image);
+
+        double min = Double.MAX_VALUE;
+        String found = null;
+
+        for (File otherFile : listFiles("images")) {
+            if (file.getPath().equals(otherFile.getPath())) // On skip soit même
+                continue;
+
+            var other = preprocessImage(otherFile);
+
+            int[] otherVector = getVector(other);
+            var dist = vectorDistance(vector, otherVector);
+
+            if (dist < min) {
+                min = dist;
+                found = otherFile.getName();
+            }
+        }
+
+        return Integer.parseInt(found.split("_")[0]);
+    }
+
+    /**
+     * Permet d'évaluer une image en particulier en la comparant à toutes les autres
+     * 
+     * @param file
+     * @return entier trouvé pour cette image par l'algorithme OCR
+     */
     protected ImageProcessor preprocessImage(File file) {
         return preprocessImagePlus(file).getProcessor();
     }
-    
+
+    /**
+     * Permet d'appliquer la chaîne de traitement à une image
+     * 
+     * @param file
+     * @return
+     */
     public ImagePlus preprocessImagePlus(File file) {
         ImagePlus baseImg = IJ.openImage(file.getPath());
 
@@ -75,12 +132,24 @@ public abstract class OCRAlgo {
         return baseImg;
     }
 
+    /**
+     * Permet de convertir en noir et blanc une image
+     * 
+     * @param ip
+     */
     protected void convertToBlackAndWhite(ImageProcessor ip) {
         byte[] pixels = (byte[]) ip.getPixels();
         for (int i = 0; i < pixels.length; i++)
             pixels[i] = (pixels[i] & 0xff) < 120 ? (byte) 0 : (byte) 255;
     }
 
+    /**
+     * Permet de calculer la distance euclidienne entre 2 vecteurs
+     * 
+     * @param v1
+     * @param v2
+     * @return
+     */
     protected double vectorDistance(int[] v1, int[] v2) {
         int sum = 0;
         for (int i = 0; i < v1.length; i++) {
@@ -90,6 +159,11 @@ public abstract class OCRAlgo {
         return Math.sqrt(sum);
     }
 
+    /**
+     * Permet de déterminer le taux de reconnaissance de la matrice actuelle
+     * 
+     * @return
+     */
     protected int matrixRecognitionRate() {
         int rate = 0;
         for (int i = 0; i < matrix.length; i++) {
