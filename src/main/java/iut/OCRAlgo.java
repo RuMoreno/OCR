@@ -15,7 +15,6 @@ public abstract class OCRAlgo {
     
     public OCRAlgo(int imageSize) {
         this.imageSize = imageSize;
-        this.matrix = new int[10][10];
     }
 
     protected abstract int evaluateImage(File file);
@@ -24,13 +23,30 @@ public abstract class OCRAlgo {
      * Permet de trouver les meilleurs réglages de préprocessing pour l'image
      * @return cet instance de l'algo
      */
-    public abstract OCRAlgo findBestProcessing();
+    public OCRAlgo findBestProcessing() {
+        int best = 15;
+        int lastRate = -1;
+        for (int i = best; i < 60; i++) {
+            System.out.println("Testing img size : " + i);
+            imageSize = i;
+            evaluate();
+            var rate = matrixRecognitionRate();
+            if (rate > lastRate) {
+                lastRate = rate;
+                best = i;
+            }
+        }
+        imageSize = best;
+        System.out.println("Best image size = " + best);
+        return this;
+    }
 
     /**
      * Permet d'évaluer l'algo à partir du jeu de test d'images
      * @return
      */
     public OCRAlgo evaluate() {
+        this.matrix = new int[10][10];
         File[] files = listFiles("images");
         for (File file : files) {
             var result = evaluateImage(file);
@@ -43,16 +59,20 @@ public abstract class OCRAlgo {
     }
 
     protected ImageProcessor preprocessImage(File file) {
+        return preprocessImagePlus(file).getProcessor();
+    }
+    
+    public ImagePlus preprocessImagePlus(File file) {
         ImagePlus baseImg = IJ.openImage(file.getPath());
 
         // Conversion en niveaux de gris
         new ImageConverter(baseImg).convertToGray8();
 
         // Conversion en noir et blanc
-        ImageProcessor img = baseImg.getProcessor();
-        convertToBlackAndWhite(img);
+        convertToBlackAndWhite(baseImg.getProcessor());
 
-        return img.resize(imageSize, imageSize);
+        baseImg.setProcessor(baseImg.getProcessor().resize(imageSize, imageSize));
+        return baseImg;
     }
 
     protected void convertToBlackAndWhite(ImageProcessor ip) {

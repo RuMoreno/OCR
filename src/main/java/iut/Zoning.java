@@ -38,25 +38,6 @@ public class Zoning extends OCRAlgo {
         return Integer.parseInt(found.split("_")[0]);
     }
 
-    @Override
-    public OCRAlgo findBestProcessing() {
-        int best = 15;
-        int lastRate = -1;
-        for (int i = best; i < 60; i++) {
-            System.out.println("Testing img size : " + i);
-            imageSize = i;
-            evaluate();
-            var rate = matrixRecognitionRate();
-            if (rate > lastRate) {
-                lastRate = rate;
-                best = i;
-            }
-        }
-        imageSize = best;
-        System.out.println("Best image size = " + best);
-        return this;
-    }
-
     private int[] createZonesVector(ImageProcessor image, int cellCount) {
         int[] vector = new int[cellCount * cellCount];
         int cellHeight = image.getHeight() / cellCount;
