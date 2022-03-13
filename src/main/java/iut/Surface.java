@@ -12,7 +12,7 @@ public class Surface extends OCRAlgo {
         byte[] pixels = (byte[]) image.getPixels();
         int[] result = new int[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
-            result[i] = (pixels[i] & 0xff) == 0 ? 1 : 0;
+            result[i] = (pixels[i] & 0xff) == 0 ? 0 : 1;
         }
         return result;
     }
